@@ -374,6 +374,8 @@ die Umsetzung entsprechender organisatorischer Maßnahmen liegt außerhalb des t
 
 ## 30. Backlog
 
+- **CSV-Import für Mitarbeiter/Subunternehmer und Maschinen** (Massenanlage statt einzeln über das
+  Adminformular — wichtig für die Erstbefüllung mit den ca. 100 echten Maschinen und allen Personen)
 - Anpassung der Anzeigetexte (zentral abgelegt in `src/lib/ui-texts.ts`, inhaltliche Überarbeitung nicht
   Bestandteil des MVP)
 - Direkte Übergabe zwischen Personen
