@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: machine_list
+      POSTGRES_PASSWORD: machine_list
+      POSTGRES_DB: machine_list
+    ports:
+      - "5432:5432"
+    volumes:
+      - machine_list_pgdata:/var/lib/postgresql/data
+      - ./docker/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U machine_list"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  machine_list_pgdata:
