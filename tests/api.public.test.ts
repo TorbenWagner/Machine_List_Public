@@ -5,6 +5,7 @@ import { GET as getMachine } from "@/app/api/public/machines/[qrToken]/route";
 import { GET as getPeople } from "@/app/api/public/machines/[qrToken]/people/route";
 import { POST as postCheckout } from "@/app/api/public/machines/[qrToken]/checkout/route";
 import { POST as postCheckin } from "@/app/api/public/machines/[qrToken]/checkin/route";
+import { PUBLIC_ACCESS_COOKIE_NAME, createPublicAccessToken } from "@/lib/auth/publicAccess";
 import type { SeedResult } from "@/db/seed/seedDatabase";
 
 let seed: SeedResult;
@@ -13,18 +14,27 @@ beforeEach(async () => {
   seed = await resetAndSeed();
 });
 
+/** Cookie-Header mit gueltigem oeffentlichem Zugangs-Token fuer Testanfragen. */
+function accessCookieHeader(): string {
+  return `${PUBLIC_ACCESS_COOKIE_NAME}=${createPublicAccessToken()}`;
+}
+
+function publicRequest(url: string) {
+  return new NextRequest(url, { headers: { cookie: accessCookieHeader() } });
+}
+
 function jsonRequest(url: string, body: unknown) {
   return new NextRequest(url, {
     method: "POST",
     body: JSON.stringify(body),
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", cookie: accessCookieHeader() },
   });
 }
 
 describe("Öffentliche API - Sicherheit", () => {
   it("GET /api/public/machines/[qrToken] gibt nur öffentlich zulässige Felder zurück", async () => {
     const machine = seed.machines.inStorage[0];
-    const response = await getMachine(new NextRequest(`http://localhost/api/public/machines/${machine.qrToken}`), {
+    const response = await getMachine(publicRequest(`http://localhost/api/public/machines/${machine.qrToken}`), {
       params: Promise.resolve({ qrToken: machine.qrToken }),
     });
     expect(response.status).toBe(200);
@@ -49,7 +59,7 @@ describe("Öffentliche API - Sicherheit", () => {
   });
 
   it("GET /api/public/machines/[qrToken] liefert bei unbekanntem Token eine neutrale 404-Fehlermeldung", async () => {
-    const response = await getMachine(new NextRequest("http://localhost/api/public/machines/unknown-token"), {
+    const response = await getMachine(publicRequest("http://localhost/api/public/machines/unknown-token"), {
       params: Promise.resolve({ qrToken: "unknown-token" }),
     });
     expect(response.status).toBe(404);
@@ -59,7 +69,7 @@ describe("Öffentliche API - Sicherheit", () => {
   });
 
   it("GET .../people gibt nur id, displayName, company, personType zurück und keine inaktiven Personen", async () => {
-    const response = await getPeople();
+    const response = await getPeople(publicRequest("http://localhost/api/public/machines/token/people"));
     expect(response.status).toBe(200);
     const body = await response.json();
 
@@ -113,5 +123,42 @@ describe("Öffentliche API - Sicherheit", () => {
     expect(checkinResponse.status).toBe(200);
     const afterCheckin = await checkinResponse.json();
     expect(afterCheckin.status).toBe("IM_LAGER");
+  });
+
+  it("lehnt GET /api/public/machines/[qrToken] ohne Zugangs-Cookie mit 401 ab", async () => {
+    const machine = seed.machines.inStorage[0];
+    const response = await getMachine(new NextRequest(`http://localhost/api/public/machines/${machine.qrToken}`), {
+      params: Promise.resolve({ qrToken: machine.qrToken }),
+    });
+    expect(response.status).toBe(401);
+  });
+
+  it("lehnt GET .../people ohne Zugangs-Cookie mit 401 ab", async () => {
+    const response = await getPeople(new NextRequest("http://localhost/api/public/machines/token/people"));
+    expect(response.status).toBe(401);
+  });
+
+  it("lehnt POST checkout ohne Zugangs-Cookie mit 401 ab", async () => {
+    const machine = seed.machines.inStorage[0];
+    const response = await postCheckout(
+      new NextRequest(`http://localhost/api/public/machines/${machine.qrToken}/checkout`, {
+        method: "POST",
+        body: JSON.stringify({ personId: seed.employees[0].id }),
+        headers: { "content-type": "application/json" },
+      }),
+      { params: Promise.resolve({ qrToken: machine.qrToken }) },
+    );
+    expect(response.status).toBe(401);
+  });
+
+  it("lehnt ein manipuliertes/ungültiges Zugangs-Cookie mit 401 ab", async () => {
+    const machine = seed.machines.inStorage[0];
+    const response = await getMachine(
+      new NextRequest(`http://localhost/api/public/machines/${machine.qrToken}`, {
+        headers: { cookie: `${PUBLIC_ACCESS_COOKIE_NAME}=manipulierter-wert` },
+      }),
+      { params: Promise.resolve({ qrToken: machine.qrToken }) },
+    );
+    expect(response.status).toBe(401);
   });
 });

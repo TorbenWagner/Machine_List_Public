@@ -79,6 +79,13 @@ export const uiTexts = {
     submitting: "Wird gespeichert …",
     noPeopleFound: "Keine Person gefunden.",
   },
+  publicAccess: {
+    title: "Zugang zur Maschinenverwaltung",
+    description: "Bitte gib das Zugangspasswort ein, um fortzufahren.",
+    passwordLabel: "Passwort",
+    submitButton: "Bestätigen",
+    error: "Passwort ist falsch.",
+  },
   admin: {
     loginTitle: "Administration – Anmeldung",
     loginUsernameLabel: "Benutzername",

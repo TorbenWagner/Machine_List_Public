@@ -2,6 +2,7 @@ import { getPublicMachineView, type PublicMachineView as PublicMachineViewData }
 import { PublicMachineView } from "@/components/public/PublicMachineView";
 import { isServiceError } from "@/lib/serviceError";
 import { uiTexts } from "@/lib/ui-texts";
+import { requirePublicAccess } from "@/lib/auth/publicAccess";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ async function loadMachine(qrToken: string): Promise<PublicMachineViewData | nul
 
 export default async function MachinePage({ params }: PageProps) {
   const { qrToken } = await params;
+  await requirePublicAccess(`/m/${qrToken}`);
   const machine = await loadMachine(qrToken);
 
   if (!machine) {

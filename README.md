@@ -50,7 +50,9 @@ Stammdaten, Historie und Sonderfälle (Sperren, administrative Rückgabe, Deakti
 
 ## 2. Fachlicher Funktionsumfang
 
-- Öffentliche, QR-Code-basierte Maschinenseite (`/m/{qrToken}`) ohne Login, mit Namensauswahl statt Benutzerkonto
+- Öffentliche, QR-Code-basierte Maschinenseite (`/m/{qrToken}`) ohne individuelles Benutzerkonto, mit
+  Namensauswahl statt Login; zusätzlich durch ein gemeinsames Zugangspasswort für alle normalen Nutzer
+  geschützt (`/zugang`, getrennt vom Admin-Zugang)
 - Entnahme und Rückgabe von Maschinen inkl. Pflicht- und Optionalfeldern (Person, Einsatzort/Projekt, geplante
   Rückgabe, Kommentar)
 - Statusmodell `IM_LAGER` → `AUSGELIEHEN` → `IM_LAGER`, zusätzlich `GESPERRT`
@@ -138,6 +140,7 @@ Alle Variablen sind in [`​.env.example`](./.env.example) dokumentiert:
 | `ADMIN_USERNAME` | Benutzername des einzigen Administrators |
 | `ADMIN_PASSWORD_HASH` | Gehashtes Administrator-Passwort (siehe [Abschnitt 12](#12-administrator-passwort-hash-erzeugen)) |
 | `SESSION_SECRET` | Geheimer Schlüssel zum Signieren der Admin-Session (≥ 32 Zeichen) |
+| `PUBLIC_ACCESS_PASSWORD_HASH` | Gehashtes, gemeinsames Zugangspasswort für die öffentliche QR-Anwendung (ein Passwort für alle normalen Nutzer, kein Konto pro Person, getrennt vom Admin-Passwort) |
 
 `.env.local` wird nicht versioniert (siehe `.gitignore`). Es dürfen **niemals** reale Geheimnisse in
 `.env.example` oder das Repository eingetragen werden.
@@ -206,6 +209,12 @@ npm run create-password-hash -- "MeinSicheresPasswort"
 
 Die Ausgabe (Format `scrypt:N:r:p:salt:hash`) wird als `ADMIN_PASSWORD_HASH` in die Umgebungsvariablen
 eingetragen. Es wird niemals ein Klartextpasswort gespeichert.
+
+Mit demselben Befehl wird auch der Hash für das gemeinsame Zugangspasswort der öffentlichen
+QR-Anwendung erzeugt (Umgebungsvariable `PUBLIC_ACCESS_PASSWORD_HASH`) — einfach ein anderes Passwort
+übergeben. Wer diese Seite (`/m/{qrToken}`) ohne gültiges Zugangs-Cookie aufruft, wird auf `/zugang`
+umgeleitet; nach korrekter Eingabe bleibt der Zugang für ca. ein Jahr im Browser gespeichert (kein
+erneutes Eintippen bei jedem Scan).
 
 ## 13. Anwendung lokal starten
 
@@ -378,9 +387,6 @@ die Umsetzung entsprechender organisatorischer Maßnahmen liegt außerhalb des t
   Adminformular — wichtig für die Erstbefüllung mit den ca. 100 echten Maschinen und allen Personen)
 - **Umzug auf den Firmenserver** (testweiser Umzug von Vercel/Supabase auf die eigene
   Serverinfrastruktur der Firma, vor dem eigentlichen Live-Einsatz zu prüfen)
-- **Gemeinsames Zugangspasswort für alle nicht-Admin-Nutzer** der öffentlichen QR-Anwendung
-  (kein individuelles Passwort pro Person nötig — ein Passwort für alle normalen Nutzer, getrennt
-  vom bestehenden Admin-Passwort)
 - **Maschinenfoto** (ein Foto pro Maschine in der Datenbank hinterlegen, das auf der öffentlichen
   Maschinenseite beim Scannen des jeweiligen QR-Codes mit angezeigt wird)
 - Anpassung der Anzeigetexte (zentral abgelegt in `src/lib/ui-texts.ts`, inhaltliche Überarbeitung nicht

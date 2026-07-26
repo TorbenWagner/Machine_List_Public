@@ -27,13 +27,17 @@ function sign(payload: string): string {
   return createHmac("sha256", getSessionSecret()).update(payload).digest("base64url");
 }
 
-/** Erzeugt ein signiertes Session-Token fuer den angemeldeten Administrator. */
-export function createSessionToken(username: string): string {
+/**
+ * Erzeugt ein signiertes Session-Token. `durationMs` erlaubt abweichende
+ * Gueltigkeitsdauern fuer andere Session-Arten (z. B. den langlebigen
+ * oeffentlichen Zugang), ohne die Admin-Sitzungsdauer zu veraendern.
+ */
+export function createSessionToken(username: string, durationMs: number = SESSION_DURATION_MS): string {
   const now = Date.now();
   const payload: SessionPayload = {
     username,
     issuedAt: now,
-    expiresAt: now + SESSION_DURATION_MS,
+    expiresAt: now + durationMs,
   };
   const encodedPayload = base64UrlEncode(JSON.stringify(payload));
   const signature = sign(encodedPayload);
