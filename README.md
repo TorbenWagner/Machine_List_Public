@@ -381,6 +381,8 @@ die Umsetzung entsprechender organisatorischer Maßnahmen liegt außerhalb des t
 - **Gemeinsames Zugangspasswort für alle nicht-Admin-Nutzer** der öffentlichen QR-Anwendung
   (kein individuelles Passwort pro Person nötig — ein Passwort für alle normalen Nutzer, getrennt
   vom bestehenden Admin-Passwort)
+- **Maschinenfoto** (ein Foto pro Maschine in der Datenbank hinterlegen, das auf der öffentlichen
+  Maschinenseite beim Scannen des jeweiligen QR-Codes mit angezeigt wird)
 - Anpassung der Anzeigetexte (zentral abgelegt in `src/lib/ui-texts.ts`, inhaltliche Überarbeitung nicht
   Bestandteil des MVP)
 - Direkte Übergabe zwischen Personen
@@ -389,7 +391,6 @@ die Umsetzung entsprechender organisatorischer Maßnahmen liegt außerhalb des t
 - E-Mail- oder Teams-Benachrichtigungen
 - Wartungsmanagement
 - Prüfmanagement
-- Fotos
 - Dokumente
 - Microsoft-Login
 - Mehrere Administratoren
