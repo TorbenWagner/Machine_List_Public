@@ -376,6 +376,11 @@ die Umsetzung entsprechender organisatorischer Maßnahmen liegt außerhalb des t
 
 - **CSV-Import für Mitarbeiter/Subunternehmer und Maschinen** (Massenanlage statt einzeln über das
   Adminformular — wichtig für die Erstbefüllung mit den ca. 100 echten Maschinen und allen Personen)
+- **Umzug auf den Firmenserver** (testweiser Umzug von Vercel/Supabase auf die eigene
+  Serverinfrastruktur der Firma, vor dem eigentlichen Live-Einsatz zu prüfen)
+- **Gemeinsames Zugangspasswort für alle nicht-Admin-Nutzer** der öffentlichen QR-Anwendung
+  (kein individuelles Passwort pro Person nötig — ein Passwort für alle normalen Nutzer, getrennt
+  vom bestehenden Admin-Passwort)
 - Anpassung der Anzeigetexte (zentral abgelegt in `src/lib/ui-texts.ts`, inhaltliche Überarbeitung nicht
   Bestandteil des MVP)
 - Direkte Übergabe zwischen Personen
@@ -390,7 +395,6 @@ die Umsetzung entsprechender organisatorischer Maßnahmen liegt außerhalb des t
 - Mehrere Administratoren
 - Rollen- und Berechtigungssystem
 - Eigene Domain
-- Firmenserver
 - Azure
 - Professionelles Hosting
 - Monitoring
